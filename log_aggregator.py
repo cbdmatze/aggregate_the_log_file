@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 LOG_FILE_CONTENT = """
 *.amazon.co.uk    89
 *.doubleclick.net    139
@@ -24,14 +26,32 @@ www.google-analytics.com    127
 www.googleapis.com    87
 """
 
+def count_domains(log_file, min_hits=0):
+    # Create a dictionary to hold the counts
+    domain_counts = defaultdict(int)
+    
+    # Split the log file into lines and process each line
+    for line in log_file.strip().splitlines():
+        # Split the line by whitespace to get domain and count
+        parts = line.split()
+        if len(parts) == 2:
+            domain = parts[0].lstrip('*')  # Remove leading '*' if present
+            count = int(parts[1])  # Convert count to integer
+            domain_counts[domain] += count  # Accumulate counts
 
-def count_domains(log_file, min_hits):
-  pass
+    # Filter domains by minimum hits and format output
+    filtered_domains = {domain: count for domain, count in domain_counts.items() if count >= min_hits}
 
+    # Process and format output
+    result = []
+    for domain, count in sorted(filtered_domains.items(), key=lambda x: (-x[1], x[0])):
+        result.append(f"{domain} ({count})")
+
+    return "\n".join(result)
 
 def main():
-  print(LOG_FILE_CONTENT)
-
+    result = count_domains(LOG_FILE_CONTENT, min_hits=100)
+    print(result)
 
 if __name__ == "__main__":
-  main()
+    main()
